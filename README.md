@@ -392,3 +392,58 @@ number mapped.
 Public IP- 13.222.21.231
 Port used: 8081
 Use: 13.222.21.231:8081, you will find your applica 3 on that is deployed
+pipeline {
+    agent any
+
+    tools {
+        maven "MAVEN-HOME"
+    }
+
+    stages {
+
+        stage('Checkout Repository') {
+            steps {
+                echo "Cloning the project..."
+                bat 'rmdir /s /q eclipse-maven-projects'  // deletes old project folder
+                bat 'git clone https://github.com/SarvRaksanaSaseetty/eclipse-maven-projects.git'
+            }
+        }
+
+        stage('Clean Project') {
+            steps {
+                echo "Running mvn clean..."
+                bat 'mvn clean -f eclipse-maven-projects'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo "Running mvn install..."
+                bat 'mvn install -f eclipse-maven-projects'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo "Running Tests..."
+                bat 'mvn test -f eclipse-maven-projects'
+            }
+        }
+
+        stage('Package Application') {
+            steps {
+                echo "Packaging..."
+                bat 'mvn package -f eclipse-maven-projects'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build Successful!"
+        }
+        failure {
+            echo "Build Failed!"
+        }
+    }
+}
